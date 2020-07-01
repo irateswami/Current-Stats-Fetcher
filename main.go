@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/irateswami/Current-Stats-Fetcher/api"
 )
@@ -13,6 +13,11 @@ import (
 var (
 	configs Configs
 )
+
+type BoxScores struct {
+	BoxScores []api.BoxScore
+	Mut       sync.Mutex
+}
 
 func init() {
 
@@ -35,6 +40,8 @@ func init() {
 
 func main() {
 	todaysGames := api.GetDailyGames(configs.ApiKey)
-	playerStats := api.GetBoxScore(todaysGames, configs.ApiKey)
-	fmt.Printf("%+v\n", playerStats)
+
+	var boxScores BoxScores
+	//	playerStats := api.GetBoxScore(todaysGames, configs.ApiKey)
+	//fmt.Printf("%+v\n", playerStats)
 }
