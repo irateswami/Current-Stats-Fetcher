@@ -39,9 +39,9 @@ func init() {
 }
 
 func main() {
-	todaysGames := api.GetDailyGames(configs.ApiKey)
+	//todaysGames := api.GetDailyGames(configs.ApiKey)
 
-	var boxScores BoxScores
+	//var boxScores BoxScores
 	//	playerStats := api.GetBoxScore(todaysGames, configs.ApiKey)
 	//fmt.Printf("%+v\n", playerStats)
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 type Game struct {
@@ -16,9 +17,21 @@ type Game struct {
 func GetDailyGames(password string) []Game {
 	client := &http.Client{}
 
-	// TODO: dynamically allocate dates in url
-	request, err := http.NewRequest("GET", "https://api.mysportsfeeds.com/v2.1/pull/mlb/2019-regular/date/20190330/games.json", nil)
-	if err != nil {
+	url := struct {
+		unpopulated string
+		year        string
+		date        string
+	}{
+		"https://api.mysportsfeeds.com/v2.1/pull/mlb/<YEAR>-regular/date/<DATE>/games.json",
+		time.Now().Format("2006"),
+		time.Now().Format("20060102"),
+	}
+
+	newUrl := url.unpopulated
+	newUrl = strings.Replace(newUrl, "<YEAR>", url.year, -1)
+	newUrl = strings.Replace(newUrl, "<DATE>", url.date, -1)
+
+	if request, err := http.NewRequest("GET", newUrl, nil); err != nil {
 		log.Printf("request failed: %v\n", err)
 	}
 
