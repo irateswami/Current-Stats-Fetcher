@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
+	"strings"
 )
 
 type Game struct {
@@ -14,24 +14,16 @@ type Game struct {
 	AwayTeamID int
 }
 
-func GetDailyGames(password string) []Game {
+func GetDailyGames(password, year, date string) []Game {
 	client := &http.Client{}
 
-	url := struct {
-		unpopulated string
-		year        string
-		date        string
-	}{
-		"https://api.mysportsfeeds.com/v2.1/pull/mlb/<YEAR>-regular/date/<DATE>/games.json",
-		time.Now().Format("2006"),
-		time.Now().Format("20060102"),
-	}
+	url := "https://api.mysportsfeeds.com/v2.1/pull/mlb/<YEAR>-regular/date/<DATE>/games.json"
 
-	newUrl := url.unpopulated
-	newUrl = strings.Replace(newUrl, "<YEAR>", url.year, -1)
-	newUrl = strings.Replace(newUrl, "<DATE>", url.date, -1)
+	url = strings.Replace(url, "<YEAR>", year, -1)
+	url = strings.Replace(url, "<DATE>", date, -1)
 
-	if request, err := http.NewRequest("GET", newUrl, nil); err != nil {
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
 		log.Printf("request failed: %v\n", err)
 	}
 

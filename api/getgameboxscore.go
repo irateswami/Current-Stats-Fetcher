@@ -2,24 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
-	"time"
 )
 
-func (url Url) populateBoxScoreUrl() string {
-
-	newUrl := url.unpopulated
-	newUrl = strings.Replace(newUrl, "<YEAR>", url.year, -1)
-	newUrl = strings.Replace(newUrl, "<DATE>", url.date, -1)
-	newUrl = strings.Replace(newUrl, "<AWAYTEAM>", url.awayTeam, -1)
-	newUrl = strings.Replace(newUrl, "<HOMETEAM>", url.homeTeam, -1)
-
-	return newUrl
-}
-
-func GetBoxScore(game Game, password string) BoxScore {
+func GetBoxScore(game Game, password string, year string, date string, boxScores *BoxScores) {
 
 	client := &http.Client{}
 
@@ -32,8 +21,8 @@ func GetBoxScore(game Game, password string) BoxScore {
 		homeTeam    string
 	}{
 		"https://api.mysportsfeeds.com/v2.1/pull/mlb/<YEAR>-regular/games/<DATE>-<AWAYTEAM>-<HOMETEAM>/boxscore.json",
-		time.Now().Format("2006"),
-		time.Now().Format("20060102"),
+		year,
+		date,
 		game.AwayTeam,
 		game.HomeTeam,
 	}
@@ -44,8 +33,11 @@ func GetBoxScore(game Game, password string) BoxScore {
 	newUrl = strings.Replace(newUrl, "<AWAYTEAM>", url.awayTeam, -1)
 	newUrl = strings.Replace(newUrl, "<HOMETEAM>", url.homeTeam, -1)
 
+	fmt.Printf("%+v\n", newUrl)
+
 	//request, err := http.NewRequest("GET", url.populateBoxScoreUrl(), nil)
-	if request, err := http.NewRequest("GET", newUrl, nil); err != nil {
+	request, err := http.NewRequest("GET", newUrl, nil)
+	if err != nil {
 		log.Printf("request failed: %v\n", err)
 	}
 
@@ -59,5 +51,8 @@ func GetBoxScore(game Game, password string) BoxScore {
 	boxScore := new(BoxScore)
 	json.NewDecoder(response.Body).Decode(boxScore)
 
-	return *boxScore
+	boxScores.Mut.Lock()
+	boxScores.BoxScores = append(boxScores.BoxScores, *boxScore)
+	boxScores.Mut.Unlock()
+
 }
