@@ -2,21 +2,30 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
-	"time"
 )
 
-type Url struct {
-	unpopulated string
-	year        string
-	date        string
-	awayTeam    string
-	homeTeam    string
-}
+func GetBoxScore(game Game, password string, year string, date string, boxScores *BoxScores) {
 
-func (url Url) populateBoxScoreUrl() string {
+	client := &http.Client{}
+
+	// EXAMPLE - https://api.mysportsfeeds.com/v2.1/pull/mlb/2019-regular/games/20190330-DET-TOR/boxscore.json
+	url := struct {
+		unpopulated string
+		year        string
+		date        string
+		awayTeam    string
+		homeTeam    string
+	}{
+		"https://api.mysportsfeeds.com/v2.1/pull/mlb/<YEAR>-regular/games/<DATE>-<AWAYTEAM>-<HOMETEAM>/boxscore.json",
+		year,
+		date,
+		game.AwayTeam,
+		game.HomeTeam,
+	}
 
 	newUrl := url.unpopulated
 	newUrl = strings.Replace(newUrl, "<YEAR>", url.year, -1)
@@ -24,23 +33,10 @@ func (url Url) populateBoxScoreUrl() string {
 	newUrl = strings.Replace(newUrl, "<AWAYTEAM>", url.awayTeam, -1)
 	newUrl = strings.Replace(newUrl, "<HOMETEAM>", url.homeTeam, -1)
 
-	return newUrl
-}
+	fmt.Printf("%+v\n", newUrl)
 
-func GetBoxScore(game Game, password string) BoxScore {
-
-	client := &http.Client{}
-
-	// EXAMPLE - https://api.mysportsfeeds.com/v2.1/pull/mlb/2019-regular/games/20190330-DET-TOR/boxscore.json
-	url := Url{
-		unpopulated: "https://api.mysportsfeeds.com/v2.1/pull/mlb/<YEAR>-regular/games/<DATE>-<AWAYTEAM>-<HOMETEAM>/boxscore.json",
-		year:        time.Now().Format("2006"),
-		date:        time.Now().Format("20060102"),
-		awayTeam:    game.AwayTeam,
-		homeTeam:    game.HomeTeam,
-	}
-
-	request, err := http.NewRequest("GET", url.populateBoxScoreUrl(), nil)
+	//request, err := http.NewRequest("GET", url.populateBoxScoreUrl(), nil)
+	request, err := http.NewRequest("GET", newUrl, nil)
 	if err != nil {
 		log.Printf("request failed: %v\n", err)
 	}
@@ -55,5 +51,8 @@ func GetBoxScore(game Game, password string) BoxScore {
 	boxScore := new(BoxScore)
 	json.NewDecoder(response.Body).Decode(boxScore)
 
-	return *boxScore
+	boxScores.Mut.Lock()
+	boxScores.BoxScores = append(boxScores.BoxScores, *boxScore)
+	boxScores.Mut.Unlock()
+
 }
