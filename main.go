@@ -11,6 +11,7 @@ import (
 	//"time"
 
 	"github.com/irateswami/Current-Stats-Fetcher/api"
+	//	"github.com/irateswami/Current-Stats-Fetcher/database"
 )
 
 var (
@@ -47,6 +48,7 @@ func init() {
 }
 
 func main() {
+
 	todaysGames := api.GetDailyGames(configs.ApiKey, year, date)
 
 	boxScores := new(api.BoxScores)
@@ -59,7 +61,17 @@ func main() {
 			api.GetBoxScore(todaysGames[goI], configs.ApiKey, year, date, boxScores)
 		}(i)
 	}
+
 	wg.Wait()
 
-	fmt.Printf("%+v\n", len(boxScores.BoxScores))
+	//var playerStats []api.PlayerStruct
+
+	for i := range boxScores.BoxScores {
+
+		//playerStats = append(playerStats, api.ParseBoxScore(boxScores.BoxScores[i]))
+
+		playerStats := api.ParseBoxScore(boxScores.BoxScores[i])
+		fmt.Printf("%+v\n", len(playerStats))
+	}
+
 }

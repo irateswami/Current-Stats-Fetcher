@@ -1,8 +1,8 @@
 package api
 
-func parseBoxScore(boxScore BoxScore) interface{} {
+func ParseBoxScore(boxScore BoxScore) []PlayerStruct {
 
-	var allPlayers []interface{}
+	var allPlayers []PlayerStruct
 	awayPlayers := boxScore.Stats.Away.Players
 	homePlayers := boxScore.Stats.Away.Players
 
