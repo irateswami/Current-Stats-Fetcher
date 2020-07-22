@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -32,8 +31,6 @@ func GetBoxScore(game Game, password string, year string, date string, boxScores
 	newUrl = strings.Replace(newUrl, "<DATE>", url.date, -1)
 	newUrl = strings.Replace(newUrl, "<AWAYTEAM>", url.awayTeam, -1)
 	newUrl = strings.Replace(newUrl, "<HOMETEAM>", url.homeTeam, -1)
-
-	fmt.Printf("%+v\n", newUrl)
 
 	//request, err := http.NewRequest("GET", url.populateBoxScoreUrl(), nil)
 	request, err := http.NewRequest("GET", newUrl, nil)

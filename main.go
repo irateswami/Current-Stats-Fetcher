@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -10,6 +9,7 @@ import (
 
 	//"time"
 
+	//	"github.com/davecgh/go-spew/spew"
 	"github.com/irateswami/Current-Stats-Fetcher/api"
 	//	"github.com/irateswami/Current-Stats-Fetcher/database"
 )
@@ -49,12 +49,14 @@ func init() {
 
 func main() {
 
+	// Get the games for today ---------------------------------------------------
 	todaysGames := api.GetDailyGames(configs.ApiKey, year, date)
 
 	boxScores := new(api.BoxScores)
 
 	wg.Add(len(todaysGames))
 
+	// Create a go routine for each game and grab the box score ------------------
 	for i := range todaysGames {
 		go func(goI int) {
 			defer wg.Done()
@@ -64,14 +66,13 @@ func main() {
 
 	wg.Wait()
 
-	//var playerStats []api.PlayerStruct
+	// Parse the box scores and grab all the player stats ------------------------
+	var playerStats []api.PlayerStruct
 
 	for i := range boxScores.BoxScores {
-
-		//playerStats = append(playerStats, api.ParseBoxScore(boxScores.BoxScores[i]))
-
-		playerStats := api.ParseBoxScore(boxScores.BoxScores[i])
-		fmt.Printf("%+v\n", len(playerStats))
+		stats := api.ParseBoxScore(boxScores.BoxScores[i])
+		for j := range stats {
+			playerStats = append(playerStats, stats[j])
+		}
 	}
-
 }
