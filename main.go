@@ -11,7 +11,7 @@ import (
 
 	//	"github.com/davecgh/go-spew/spew"
 	"github.com/irateswami/Current-Stats-Fetcher/api"
-	//	"github.com/irateswami/Current-Stats-Fetcher/database"
+	"github.com/irateswami/Current-Stats-Fetcher/db"
 )
 
 var (
@@ -23,6 +23,7 @@ var (
 
 func init() {
 
+	// Get the date --------------------------------------------------------------
 	//year = time.Now().Format("2006")
 	//date = time.Now().Format("20060102")
 
@@ -30,14 +31,14 @@ func init() {
 	year = "2019"
 	date = "20190330"
 
-	// Open the file
+	// Open the file -------------------------------------------------------------
 	secrets, err := os.Open("secrets.json")
 	defer secrets.Close()
 	if err != nil {
 		log.Fatalf("no secrets found: %v\n", err)
 	}
 
-	// Read in the secrets
+	// Read in the secrets -------------------------------------------------------
 	bytesSecrets, err := ioutil.ReadAll(secrets)
 	if err != nil {
 		log.Fatalf("secrets failed byte conversion: %v\n", err)
@@ -75,4 +76,7 @@ func main() {
 			playerStats = append(playerStats, stats[j])
 		}
 	}
+
+	// Insert the player stats into the database ---------------------------------
+	db.Insert(playerStats)
 }

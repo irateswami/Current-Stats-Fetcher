@@ -4,7 +4,7 @@ func ParseBoxScore(boxScore BoxScore) []PlayerStruct {
 
 	var allPlayers []PlayerStruct
 	awayPlayers := boxScore.Stats.Away.Players
-	homePlayers := boxScore.Stats.Away.Players
+	homePlayers := boxScore.Stats.Home.Players
 
 	for i := range awayPlayers {
 		newPlayer := awayPlayers[i]
