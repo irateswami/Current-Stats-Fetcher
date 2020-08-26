@@ -5,20 +5,16 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"sync"
 
-	//"time"
-
-	//	"github.com/davecgh/go-spew/spew"
 	"github.com/irateswami/Current-Stats-Fetcher/api"
-	"github.com/irateswami/Current-Stats-Fetcher/db"
+	//	"github.com/davecgh/go-spew/spew"
+	//	"github.com/irateswami/Current-Stats-Fetcher/db"
 )
 
 var (
 	configs Configs
-	year    string
 	date    string
-	wg      sync.WaitGroup
+	year    string
 )
 
 func init() {
@@ -28,8 +24,8 @@ func init() {
 	//date = time.Now().Format("20060102")
 
 	// TODO remove this, for now it's just testing things
-	year = "2019"
 	date = "20190330"
+	year = "2019"
 
 	// Open the file -------------------------------------------------------------
 	secrets, err := os.Open("secrets.json")
@@ -50,33 +46,8 @@ func init() {
 
 func main() {
 
-	// Get the games for today ---------------------------------------------------
-	todaysGames := api.GetDailyGames(configs.ApiKey, year, date)
+	playerStats := api.GetPlayerStats(configs.APIKey, year, date)
 
-	boxScores := new(api.BoxScores)
+	_ = playerStats
 
-	wg.Add(len(todaysGames))
-
-	// Create a go routine for each game and grab the box score ------------------
-	for i := range todaysGames {
-		go func(goI int) {
-			defer wg.Done()
-			api.GetBoxScore(todaysGames[goI], configs.ApiKey, year, date, boxScores)
-		}(i)
-	}
-
-	wg.Wait()
-
-	// Parse the box scores and grab all the player stats ------------------------
-	var playerStats []api.PlayerStruct
-
-	for i := range boxScores.BoxScores {
-		stats := api.ParseBoxScore(boxScores.BoxScores[i])
-		for j := range stats {
-			playerStats = append(playerStats, stats[j])
-		}
-	}
-
-	// Insert the player stats into the database ---------------------------------
-	db.Insert(playerStats)
 }
